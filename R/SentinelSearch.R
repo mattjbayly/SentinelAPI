@@ -4,10 +4,10 @@
 #' @param musr Copernicus Open Access Hub user name (authentication)
 #' @param mpass Copernicus Open Access Hub password (authentication)
 #' @param bbox Geographic area of interest (a raster extent object)
-#' @param sensing_date_start Sensing start (from) datetime 
-#' @param sensing_date_end Sensing end (to) datetime 
-
-#' @return Square of the input
+#' @param sensing_date_start Sensing start (from) datetime. Must be POSIXct object with tz.
+#' @param sensing_date_end Sensing end (to) datetime. Must be POSIXct object with tz.
+#' @param platformname Name of satellite. Either "Sentinel-1", "Sentinel-2" or c("Sentinel-1", "Sentinel-2").
+#' @return search response from server (json list)
 #' @export 
 SentinelSearch <- function(
   musr=NA,
@@ -153,6 +153,7 @@ SentinelSearch <- function(
   # end of build http query url string
   #=====================================================
   
+
   #----------------------------------------------------
   #Start: Make http request with username and password
   #print(build_string)
@@ -172,14 +173,12 @@ SentinelSearch <- function(
   doc <- xmlParse(p_resp)
   class(doc)
   a <- xmlToList(doc)
+  
   class(a)
   #jsonlite::toJSON(a, pretty=TRUE)
-  library(jsonlite)
   mjson <-  fromJSON(jsonlite::toJSON(a, pretty=TRUE))
   
-  mjson$entry.8
-  mjson$entry.8$str.18
-  
+
   # Return number of scenes to user (print)
   print(mjson$subtitle)
   

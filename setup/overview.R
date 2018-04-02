@@ -1,3 +1,4 @@
+# Load required libraries 
 library(httr)
 library(XML)
 library(getPass)
@@ -7,17 +8,8 @@ library(openssl)
 library(curl)
 library(raster)
 library(sf)
-
-# Part 1: Build search query
-# Part 2: Export search results
-# Part 3: Preview search result images
-# Part 4: Download target search images
-
-
-
-#=======================================================
-# Part 1: Build search query
-
+library(jsonlite)
+library(utils)
 
 
 
@@ -36,36 +28,58 @@ library(sf)
 # Example download link
     # https://scihub.copernicus.eu/dhus/odata/v1/Products('2b17b57d-fff4-4645-b539-91f305c27c69')/$value
 
+
+
+# Setup your account here: https://scihub.copernicus.eu/dhus/#/home
 # fields found in the login form.
-musr <- getPass(msg = "Username: ", noblank = FALSE, forcemask = TRUE)
-mpass <- getPass(msg = "Password: ", noblank = FALSE, forcemask = FALSE)
-
+  musr <- getPass(msg = "Username: ", noblank = FALSE, forcemask = TRUE)
+  mpass <- getPass(msg = "Password: ", noblank = FALSE, forcemask = FALSE)
   
+    
 # Sample arguments for function
-  bbox = extent(-128.14381948740458,-128.0907236360836,53.46611510557315,53.495720542528346)
-  sensing_date_start = as.POSIXct("03/01/18 23:03:20", "%m/%d/%y %H:%M:%S", tz = "America/Vancouver")
-  sensing_date_end = strptime("03/30/18 23:03:20", "%m/%d/%y %H:%M:%S", tz = "America/Vancouver")
-  platformname =  c("Sentinel-1", "Sentinel-2")
+  # AOI spatial bounding box (long/lat from raster package) xmin, xmax, ymin, ymax
+    bbox = extent(-128.14381948740458,-128.0907236360836,53.46611510557315,53.495720542528346)
+  # Start datetime for sensing date of image (from)
+    sensing_date_start = as.POSIXct("03/01/18 23:03:20", "%m/%d/%y %H:%M:%S", tz = "America/Vancouver")
+  # End datetime for sensing date of image (to)
+    sensing_date_end = strptime("03/30/18 23:03:20", "%m/%d/%y %H:%M:%S", tz = "America/Vancouver")
+  # Name of the satellite platform either Sentinel-1, Sentinel-1
+    platformname =  c("Sentinel-1", "Sentinel-2")
   
-  #' @export 
-  resp <- SentinelSearch(
-    musr=musr,
-    mpass=mpass,
-    bbox=bbox,
-    sensing_date_start=sensing_date_start,
-    sensing_date_end=sensing_date_end,
-    platformname=platformname
-  )
+  # Send search request to server
+    ?SentinelSearch
+    resp <- SentinelSearch(
+      musr=musr, # Supplied username
+      mpass=mpass, # Supplied password
+      bbox=bbox,
+      sensing_date_start=sensing_date_start,
+      sensing_date_end=sensing_date_end,
+      platformname=platformname
+    )
  
- 
-# Sample Image with product ID
-# https://scihub.copernicus.eu/dhus/odata/v1/Products('2b17b57d-fff4-4645-b539-91f305c27c69')
+ # Parse json response into interpretable dataframe
+    class(resp) # json "list" generated from function SentinelSearch()
+    ?SentinelSearchToDF
+    sentdf <- SentinelSearchToDF(
+      resp = resp,
+      musr=musr, # Supplied username
+      mpass=mpass # Supplied password
+    )
+    nrow(sentdf)
+    head(sentdf)
+    
 
-
-# Full request 
-# https://scihub.copernicus.eu/dhus/api/stub/products?filter=(%20footprint:%22Intersects(POLYGON((-128.13151576238064%2053.48235577606505,-128.10586020725893%2053.48235577606505,-128.10586020725893%2053.49377119331655,-128.13151576238064%2053.49377119331655,-128.13151576238064%2053.48235577606505)))%22%20)%20AND%20(%20beginPosition:[2018-03-01T00:00:00.000Z%20TO%202018-03-30T23:59:59.999Z]%20AND%20endPosition:[2018-03-01T00:00:00.000Z%20TO%202018-03-30T23:59:59.999Z]%20)%20AND%20%20%20(platformname:Sentinel-1)%20OR%20(platformname:Sentinel-2)&offset=0&limit=25&sortedby=beginposition&order=desc
-
-
+# Download thumbnails to sample folder
+    samp_thumbnail_dir <- paste0("C:/Users/",Sys.getenv("USERNAME"),"/Desktop/sample_thumbnails")
+    samp_thumbnail_dir
+    setwd(samp_thumbnail_dir)
+    
+    
+    SentinelThumbnailPreview(sentinel.df=sentdf,
+                             thumbnail.dir = samp_thumbnail_dir,
+                             musr=musr,
+                             mpass=mpass)
+    
 
 
 
