@@ -69,6 +69,9 @@ SentinelSearchToDF <- function(
     names(mjson)
     mimages <- names(mjson)[grepl("entry", names(mjson))]
     
+    if(length(mimages) == 0){
+      next
+    }
     
     #======================================
     # Extract target fields

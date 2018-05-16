@@ -10,6 +10,7 @@ library(raster)
 library(sf)
 library(jsonlite)
 library(utils)
+library(jpeg)
 
 
 
@@ -38,14 +39,19 @@ library(utils)
     
 # Sample arguments for function
   # AOI spatial bounding box (long/lat from raster package) xmin, xmax, ymin, ymax
-    bbox = extent(-128.14381948740458,-128.0907236360836,53.46611510557315,53.495720542528346)
+    #bbox = extent(-128.14381948740458,-128.0907236360836,53.46611510557315,53.495720542528346)
+    bbox = extent(-130.462654,-130.397051,54.235637,54.329308)
+    
+    
+    
   # Start datetime for sensing date of image (from)
-    sensing_date_start = as.POSIXct("03/01/18 23:03:20", "%m/%d/%y %H:%M:%S", tz = "America/Vancouver")
+    sensing_date_start = as.POSIXct("03/01/17 23:03:20", "%m/%d/%y %H:%M:%S", tz = "America/Vancouver")
   # End datetime for sensing date of image (to)
-    sensing_date_end = strptime("03/30/18 23:03:20", "%m/%d/%y %H:%M:%S", tz = "America/Vancouver")
+    sensing_date_end = strptime("05/30/18 23:03:20", "%m/%d/%y %H:%M:%S", tz = "America/Vancouver")
   # Name of the satellite platform either Sentinel-1, Sentinel-1
-    platformname =  c("Sentinel-1", "Sentinel-2")
-  
+    #platformname =  c("Sentinel-1", "Sentinel-2")
+    platformname =  c("Sentinel-2")
+    
   # Send search request to server
     ?SentinelSearch
     resp <- SentinelSearch(
@@ -66,7 +72,7 @@ library(utils)
       mpass=mpass # Supplied password
     )
     nrow(sentdf)
-    head(sentdf)
+    head(sentdf, 3)
     
 
 # Download thumbnails to sample folder
